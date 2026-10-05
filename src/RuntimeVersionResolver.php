@@ -75,7 +75,10 @@ class RuntimeVersionResolver
     private function run(string | array $command, string $pattern): ?string
     {
         try {
-            $result = Process::path(base_path())->timeout(5)->run($command);
+            $result = Process::path(base_path())
+                ->env(ConfiguredCommandBuilder::ENVIRONMENT)
+                ->timeout(5)
+                ->run($command);
         } catch (Throwable) {
             return null;
         }

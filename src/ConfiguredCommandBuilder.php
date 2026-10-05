@@ -5,6 +5,19 @@ namespace Cmsmaxinc\FilamentSystemVersions;
 class ConfiguredCommandBuilder
 {
     /**
+     * Environment for every tool this package shells out to.
+     *
+     * Symfony Console records `--quiet` by exporting SHELL_VERBOSITY=-1, and
+     * child processes inherit it. Composer is a Symfony Console app, so when
+     * the parent artisan process was started quietly (as some schedulers do)
+     * composer silently prints nothing and still exits 0. Pinning it back to
+     * normal verbosity keeps the output we parse.
+     *
+     * @var array<string, string>
+     */
+    public const ENVIRONMENT = ['SHELL_VERBOSITY' => '0'];
+
+    /**
      * @param  array<int, string>  $arguments
      * @return string|array<int, string>
      */
