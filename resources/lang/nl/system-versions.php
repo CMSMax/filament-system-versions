@@ -45,6 +45,7 @@ return [
             'total' => 'geïnstalleerd',
             'updates' => 'updates',
             'to' => 'naar',
+            'no_matches' => 'Geen packages die aan dit filter voldoen.',
             'no_data' => 'Nog geen dependency-gegevens. Voer het Artisan-commando dependency:versions uit om deze te verzamelen.',
             'missing_table' => 'De composer versions-tabel is nog niet gemigreerd. Publiceer en voer eerst de migraties van dit package uit.',
             'table' => [

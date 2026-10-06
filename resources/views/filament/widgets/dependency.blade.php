@@ -12,11 +12,26 @@
                 </p>
             </div>
         @else
-            <div class="fsv-summary" role="group" aria-label="{{ __('filament-system-versions::system-versions.widgets.dependency.summary_label') }}">
-                <span><strong>{{ number_format($total) }}</strong> {{ __('filament-system-versions::system-versions.widgets.dependency.total') }}</span>
-                <span><strong>{{ number_format($updates) }}</strong> {{ __('filament-system-versions::system-versions.widgets.dependency.updates') }}</span>
-                <span><strong>{{ number_format($abandoned) }}</strong> {{ __('filament-system-versions::system-versions.widgets.dependency.abandoned') }}</span>
+            <div class="fsv-summary fsv-filters" role="group" aria-label="{{ __('filament-system-versions::system-versions.widgets.dependency.summary_label') }}">
+                @foreach([
+                    'all' => [$total, 'total'],
+                    'updates' => [$updates, 'updates'],
+                    'abandoned' => [$abandoned, 'abandoned'],
+                ] as $filterKey => [$count, $labelKey])
+                    <button
+                        type="button"
+                        class="fsv-filter"
+                        wire:click="setFilter('{{ $filterKey }}')"
+                        aria-pressed="{{ $filter === $filterKey ? 'true' : 'false' }}"
+                    >
+                        <strong>{{ number_format($count) }}</strong> {{ __("filament-system-versions::system-versions.widgets.dependency.{$labelKey}") }}
+                    </button>
+                @endforeach
             </div>
+
+            @if($groups->isEmpty())
+                <p class="fsv-empty-text">{{ __('filament-system-versions::system-versions.widgets.dependency.no_matches') }}</p>
+            @endif
 
             <div class="fsv-groups">
                 @foreach($groups as $group)

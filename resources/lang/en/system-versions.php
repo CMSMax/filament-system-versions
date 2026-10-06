@@ -45,6 +45,7 @@ return [
             'total' => 'installed',
             'updates' => 'updates',
             'to' => 'to',
+            'no_matches' => 'No packages match this filter.',
             'no_data' => 'No dependency data yet. Run the dependency:versions Artisan command to collect it.',
             'missing_table' => 'The composer versions table has not been migrated yet. Publish and run this package\'s migrations first.',
             'table' => [

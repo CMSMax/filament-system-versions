@@ -11,7 +11,21 @@ use Livewire\Attributes\On;
 
 class DependencyWidget extends Widget
 {
+    public const FILTER_ALL = 'all';
+
+    public const FILTER_UPDATES = 'updates';
+
+    public const FILTER_ABANDONED = 'abandoned';
+
+    public const FILTERS = [self::FILTER_ALL, self::FILTER_UPDATES, self::FILTER_ABANDONED];
+
     protected string $view = 'filament-system-versions::filament.widgets.dependency';
+
+    /**
+     * Which packages the list shows. Defaults to the ones with an update, since
+     * that is what someone opening this page usually wants to act on.
+     */
+    public string $filter = self::FILTER_UPDATES;
 
     public function getCardHeading(): string
     {
@@ -21,6 +35,13 @@ class DependencyWidget extends Widget
     public function getDescription(): string
     {
         return __('filament-system-versions::system-versions.widgets.dependency.description');
+    }
+
+    public function setFilter(string $filter): void
+    {
+        if (in_array($filter, self::FILTERS, true)) {
+            $this->filter = $filter;
+        }
     }
 
     #[On(SystemVersions::DEPENDENCY_VERSIONS_REFRESHED_EVENT)]
@@ -56,19 +77,30 @@ class DependencyWidget extends Widget
                 });
         }
 
+        // The property is writable from the browser, so fall back to the default for anything unexpected.
+        $filter = in_array($this->filter, self::FILTERS, true) ? $this->filter : self::FILTER_UPDATES;
+
+        $visibleDependencies = match ($filter) {
+            self::FILTER_UPDATES => $dependencies->where('status', '!=', 'up-to-date'),
+            self::FILTER_ABANDONED => $dependencies->where('abandoned', true),
+            default => $dependencies,
+        };
+
         $groups = collect([
             ['key' => 'direct-runtime', 'direct' => true, 'scope' => 'runtime', 'open' => true],
             ['key' => 'direct-development', 'direct' => true, 'scope' => 'development', 'open' => true],
             ['key' => 'transitive-runtime', 'direct' => false, 'scope' => 'runtime', 'open' => false],
             ['key' => 'transitive-development', 'direct' => false, 'scope' => 'development', 'open' => false],
             ['key' => 'unclassified', 'direct' => null, 'scope' => 'unknown', 'open' => false],
-        ])->map(function (array $group) use ($dependencies): array {
-            $items = $dependencies->where('scope', $group['scope']);
+        ])->map(function (array $group) use ($visibleDependencies, $filter): array {
+            $items = $visibleDependencies->where('scope', $group['scope']);
 
             if ($group['direct'] !== null) {
                 $items = $items->filter(fn ($dependency): bool => (bool) $dependency->direct_dependency === $group['direct']);
             }
 
+            // A filtered list is short, so every group with a match starts expanded.
+            $group['open'] = $group['open'] || $filter !== self::FILTER_ALL;
             $group['label'] = __("filament-system-versions::system-versions.groups.{$group['key']}");
             $group['dependencies'] = $items->values();
 
@@ -81,6 +113,7 @@ class DependencyWidget extends Widget
             'total' => $dependencies->count(),
             'updates' => $dependencies->where('status', '!=', 'up-to-date')->count(),
             'abandoned' => $dependencies->where('abandoned', true)->count(),
+            'filter' => $filter,
             'missingTable' => $missingTable,
             'hasData' => $hasData,
             'heading' => $this->getCardHeading(),
