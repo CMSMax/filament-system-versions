@@ -35,6 +35,18 @@ it('collects Composer Node and npm versions from the configured project root', f
     Process::assertRanTimes(fn (PendingProcess $process): bool => $process->path === base_path(), 3);
 });
 
+it('runs version checks at normal verbosity so a quiet parent process cannot blank them', function () {
+    Process::fake([
+        '*composer*' => Process::result('Composer version 2.8.11 2025-01-01 00:00:00'),
+        '*node*' => Process::result('v22.14.0'),
+        '*npm*' => Process::result('11.1.0'),
+    ]);
+
+    app(RuntimeVersionResolver::class)->refresh();
+
+    Process::assertRanTimes(fn (PendingProcess $process): bool => ($process->environment['SHELL_VERBOSITY'] ?? null) === '0', 3);
+});
+
 it('stores unavailable values instead of failing when binaries cannot run', function () {
     Process::fake([
         '*' => Process::result(errorOutput: 'not found', exitCode: 1),

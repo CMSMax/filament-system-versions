@@ -1,5 +1,6 @@
 <?php
 
+use Cmsmaxinc\FilamentSystemVersions\ConfiguredCommandBuilder;
 use Cmsmaxinc\FilamentSystemVersions\RuntimeVersionResolver;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Cache;
@@ -38,6 +39,22 @@ it('runs composer from the application root, not the inherited working directory
     $this->artisan('dependency:versions')->assertSuccessful();
 
     Process::assertRan(fn (PendingProcess $process) => $process->path === base_path());
+});
+
+it('runs composer at normal verbosity even when the parent process was started quietly', function () use ($composerOutput) {
+    // `artisan --quiet` exports SHELL_VERBOSITY=-1, which composer inherits and
+    // obeys by printing nothing while still exiting 0. That surfaced nightly in
+    // production as "Composer produced no output to parse."
+    Process::fake([
+        '*' => Process::result($composerOutput),
+    ]);
+
+    $this->artisan('dependency:versions')->assertSuccessful();
+
+    $composerShow = app(ConfiguredCommandBuilder::class)->composer(['show', '--latest', '--format=json']);
+
+    Process::assertRan(fn (PendingProcess $process) => $process->command === $composerShow
+        && ($process->environment['SHELL_VERBOSITY'] ?? null) === '0');
 });
 
 it('stores the reported packages', function () use ($composerOutput) {

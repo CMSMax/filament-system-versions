@@ -116,7 +116,7 @@ class CheckDependencyVersions extends Command
         // queue worker's or web server's cwd is not necessarily the app root
         // (Laravel Cloud runs from `/` while the app lives in /var/www/html),
         // so the process is pinned to base_path() explicitly.
-        $process = Process::path(base_path());
+        $process = Process::path(base_path())->env(ConfiguredCommandBuilder::ENVIRONMENT);
 
         $result = $process->run(
             app(ConfiguredCommandBuilder::class)->composer(['show', '--latest', '--format=json'])
