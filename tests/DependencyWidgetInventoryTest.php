@@ -65,8 +65,11 @@ it('includes up-to-date packages and organizes every Composer dependency', funct
         ],
     ]);
 
+    $widget = new DependencyWidget;
+    $widget->filter = DependencyWidget::FILTER_ALL;
+
     $method = new ReflectionMethod(DependencyWidget::class, 'getViewData');
-    $data = $method->invoke(new DependencyWidget);
+    $data = $method->invoke($widget);
 
     expect($data['dependencies'])->toHaveCount(2)
         ->and($data['total'])->toBe(2)
@@ -78,8 +81,102 @@ it('includes up-to-date packages and organizes every Composer dependency', funct
         ]);
 
     Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->call('setFilter', DependencyWidget::FILTER_ALL)
         ->assertSee('Composer packages')
         ->assertSee('vendor/direct-current')
         ->assertSee('Up to date')
         ->assertSee('Transitive development packages');
+});
+
+function seedFilterablePackages(): void
+{
+    $row = fn (string $name, string $status, bool $abandoned): array => [
+        'name' => $name,
+        'current_version' => '1.0.0',
+        'latest_version' => $status === 'up-to-date' ? '1.0.0' : '2.0.0',
+        'status' => $status,
+        'description' => null,
+        'direct_dependency' => true,
+        'abandoned' => $abandoned,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+
+    DB::table('composer_versions')->insert([
+        $row('vendor/current', 'up-to-date', false),
+        $row('vendor/outdated', 'semver-safe-update', false),
+        $row('vendor/retired', 'up-to-date', true),
+    ]);
+}
+
+it('shows only packages with an update by default', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->assertSet('filter', DependencyWidget::FILTER_UPDATES)
+        ->assertSee('vendor/outdated')
+        ->assertDontSee('vendor/current')
+        ->assertDontSee('vendor/retired');
+});
+
+it('filters the list when a summary count is clicked', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->call('setFilter', DependencyWidget::FILTER_ABANDONED)
+        ->assertSee('vendor/retired')
+        ->assertDontSee('vendor/outdated')
+        ->call('setFilter', DependencyWidget::FILTER_ALL)
+        ->assertSee('vendor/current')
+        ->assertSee('vendor/outdated')
+        ->assertSee('vendor/retired');
+});
+
+it('keeps the summary counts for every package while a filter is active', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->assertSeeHtml('<strong>3</strong>')
+        ->assertSeeHtml('<strong>1</strong>');
+});
+
+it('says so when no package matches the filter', function () {
+    DB::table('composer_versions')->insert([
+        'name' => 'vendor/current',
+        'current_version' => '1.0.0',
+        'latest_version' => '1.0.0',
+        'status' => 'up-to-date',
+        'description' => null,
+        'direct_dependency' => true,
+        'abandoned' => false,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->assertSee('No packages match this filter.')
+        ->assertDontSee('vendor/current');
+});
+
+it('ignores an unknown filter value', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->call('setFilter', 'everything')
+        ->assertSet('filter', DependencyWidget::FILTER_UPDATES)
+        ->set('filter', 'everything')
+        ->assertSee('vendor/outdated')
+        ->assertDontSee('vendor/current');
+});
+
+it('describes the list for the selected filter', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->assertSee('Composer packages with an update')
+        ->call('setFilter', DependencyWidget::FILTER_ABANDONED)
+        ->assertSee('Abandoned Composer packages')
+        ->call('setFilter', DependencyWidget::FILTER_ALL)
+        ->assertSee('Every installed Composer package')
+        ->assertDontSee('Composer packages with an update');
 });

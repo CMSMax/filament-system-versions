@@ -39,12 +39,17 @@ return [
     'widgets' => [
         'dependency' => [
             'heading' => 'Composer packages',
-            'description' => 'Every installed Composer package, grouped by relationship and application scope',
+            'description' => [
+                'all' => 'Every installed Composer package, grouped by relationship and application scope.',
+                'updates' => 'Composer packages with an update, grouped by relationship and application scope. Select installed to see every package.',
+                'abandoned' => 'Abandoned Composer packages, grouped by relationship and application scope. Select installed to see every package.',
+            ],
             'abandoned' => 'Abandoned',
             'summary_label' => 'Composer package summary',
             'total' => 'installed',
             'updates' => 'updates',
             'to' => 'to',
+            'no_matches' => 'No packages match this filter.',
             'no_data' => 'No dependency data yet. Run the dependency:versions Artisan command to collect it.',
             'missing_table' => 'The composer versions table has not been migrated yet. Publish and run this package\'s migrations first.',
             'table' => [

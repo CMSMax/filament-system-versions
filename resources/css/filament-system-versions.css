@@ -107,6 +107,36 @@
     font-variant-numeric: tabular-nums;
 }
 
+.fsv-summary.fsv-filters {
+    gap: 0.5rem;
+    opacity: 1;
+}
+
+.fsv-filter {
+    padding: 0.25rem 0.75rem;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    opacity: 0.72;
+    cursor: pointer;
+}
+
+.fsv-filter:hover {
+    background: rgba(128, 128, 128, 0.08);
+}
+
+.fsv-filter[aria-pressed="true"] {
+    background: rgba(128, 128, 128, 0.16);
+    opacity: 1;
+}
+
+.fsv-filter:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
 .fsv-groups {
     display: flex;
     flex-direction: column;

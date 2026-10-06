@@ -39,12 +39,17 @@ return [
     'widgets' => [
         'dependency' => [
             'heading' => 'Composer-packages',
-            'description' => 'Elk geïnstalleerd Composer-package, gegroepeerd op relatie en applicatiebereik',
+            'description' => [
+                'all' => 'Elk geïnstalleerd Composer-package, gegroepeerd op relatie en applicatiebereik.',
+                'updates' => 'Composer-packages met een update, gegroepeerd op relatie en applicatiebereik. Selecteer geïnstalleerd om elk package te zien.',
+                'abandoned' => 'Niet meer onderhouden Composer-packages, gegroepeerd op relatie en applicatiebereik. Selecteer geïnstalleerd om elk package te zien.',
+            ],
             'abandoned' => 'Niet meer onderhouden',
             'summary_label' => 'Samenvatting Composer-packages',
             'total' => 'geïnstalleerd',
             'updates' => 'updates',
             'to' => 'naar',
+            'no_matches' => 'Geen packages die aan dit filter voldoen.',
             'no_data' => 'Nog geen dependency-gegevens. Voer het Artisan-commando dependency:versions uit om deze te verzamelen.',
             'missing_table' => 'De composer versions-tabel is nog niet gemigreerd. Publiceer en voer eerst de migraties van dit package uit.',
             'table' => [
