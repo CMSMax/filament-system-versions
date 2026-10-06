@@ -39,7 +39,7 @@ return [
     'widgets' => [
         'dependency' => [
             'heading' => 'Composer packages',
-            'description' => 'Every installed Composer package, grouped by relationship and application scope',
+            'description' => 'Composer packages with an update, grouped by relationship and application scope. Select a count to filter the list, or select installed to see every package.',
             'abandoned' => 'Abandoned',
             'summary_label' => 'Composer package summary',
             'total' => 'installed',

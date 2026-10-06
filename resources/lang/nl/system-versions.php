@@ -39,7 +39,7 @@ return [
     'widgets' => [
         'dependency' => [
             'heading' => 'Composer-packages',
-            'description' => 'Elk geïnstalleerd Composer-package, gegroepeerd op relatie en applicatiebereik',
+            'description' => 'Composer-packages met een update, gegroepeerd op relatie en applicatiebereik. Selecteer een aantal om de lijst te filteren, of selecteer geïnstalleerd om elk package te zien.',
             'abandoned' => 'Niet meer onderhouden',
             'summary_label' => 'Samenvatting Composer-packages',
             'total' => 'geïnstalleerd',
