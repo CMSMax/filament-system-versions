@@ -32,9 +32,12 @@ class DependencyWidget extends Widget
         return __('filament-system-versions::system-versions.widgets.dependency.heading');
     }
 
+    /**
+     * Describes the list for the filter that is currently selected.
+     */
     public function getDescription(): string
     {
-        return __('filament-system-versions::system-versions.widgets.dependency.description');
+        return __("filament-system-versions::system-versions.widgets.dependency.description.{$this->getActiveFilter()}");
     }
 
     public function setFilter(string $filter): void
@@ -42,6 +45,14 @@ class DependencyWidget extends Widget
         if (in_array($filter, self::FILTERS, true)) {
             $this->filter = $filter;
         }
+    }
+
+    /**
+     * The property is writable from the browser, so anything unexpected falls back to the default.
+     */
+    protected function getActiveFilter(): string
+    {
+        return in_array($this->filter, self::FILTERS, true) ? $this->filter : self::FILTER_UPDATES;
     }
 
     #[On(SystemVersions::DEPENDENCY_VERSIONS_REFRESHED_EVENT)]
@@ -77,8 +88,7 @@ class DependencyWidget extends Widget
                 });
         }
 
-        // The property is writable from the browser, so fall back to the default for anything unexpected.
-        $filter = in_array($this->filter, self::FILTERS, true) ? $this->filter : self::FILTER_UPDATES;
+        $filter = $this->getActiveFilter();
 
         $visibleDependencies = match ($filter) {
             self::FILTER_UPDATES => $dependencies->where('status', '!=', 'up-to-date'),

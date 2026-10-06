@@ -168,3 +168,15 @@ it('ignores an unknown filter value', function () {
         ->assertSee('vendor/outdated')
         ->assertDontSee('vendor/current');
 });
+
+it('describes the list for the selected filter', function () {
+    seedFilterablePackages();
+
+    Livewire::test(RenderableDependencyInventoryWidget::class)
+        ->assertSee('Composer packages with an update')
+        ->call('setFilter', DependencyWidget::FILTER_ABANDONED)
+        ->assertSee('Abandoned Composer packages')
+        ->call('setFilter', DependencyWidget::FILTER_ALL)
+        ->assertSee('Every installed Composer package')
+        ->assertDontSee('Composer packages with an update');
+});
